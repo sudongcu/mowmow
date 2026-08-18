@@ -1,0 +1,25 @@
+# local tooling / editor
+.claude/
+.vscode/
+.idea/
+
+# internal planning docs
+PROJECT.md
+
+# secrets — .env.example only
+.env
+.env.*
+!.env.example
+
+# node
+# (dist/ is committed on purpose — the action runs straight from the repo checkout)
+node_modules/
+*.tsbuildinfo
+npm-debug.log*
+
+# generated output (lives on the orphan `output` branch, never on main)
+*-lawn.svg
+
+# os cruft
+.DS_Store
+Thumbs.db

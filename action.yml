@@ -1,0 +1,56 @@
+# action.yml lives at the repo root (not action/) so users can write
+# `uses: sudongcu/mowmow@v1` — github only resolves root-level actions that way.
+name: "mowmow"
+description: "your github contribution graph, as a lawn that gets mowed — and grows back"
+author: "sudongcu"
+branding:
+  icon: "scissors"
+  color: "green"
+
+inputs:
+  github_user_name:
+    description: "github login whose lawn gets mowed"
+    required: true
+  outputs:
+    description: >-
+      newline-separated list of files to generate, relative to the root of the
+      target branch. each line may carry overrides as a query string:
+      theme=light|dark, cycle=<seconds, 28+>, weeks=<1-53>,
+      mower=push|riding|goat, mower_color=<hex>, stripes=false.
+      e.g. `lawn.svg?theme=dark&mower=goat`
+    required: false
+    default: |
+      lawn.svg
+      lawn-dark.svg?theme=dark
+  cycle:
+    description: "seconds per mow-and-regrow loop. 28 or more — shorter and the last row can't regrow in time, so timings get clamped with a warning. no hard ceiling"
+    required: false
+    default: "30"
+  theme:
+    description: "default theme for outputs that don't override it: light | dark"
+    required: false
+    default: "light"
+  mower:
+    description: "what does the mowing: push | riding | goat"
+    required: false
+    default: "push"
+  mower_color:
+    description: "hex color for the mower body (or the goat's coat), e.g. #ff8800 — empty keeps the theme default"
+    required: false
+    default: ""
+  target_branch:
+    description: "branch the files are force-pushed to as a single orphan commit"
+    required: false
+    default: "output"
+  push:
+    description: "set to \"false\" to only stage files in mowmow/ and skip the push"
+    required: false
+    default: "true"
+  github_token:
+    description: "token used to read the contribution calendar and push the output branch"
+    required: false
+    default: "${{ github.token }}"
+
+runs:
+  using: "node20"
+  main: "dist/action.js"

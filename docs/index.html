@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mowmow — mow your contribution graph</title>
+<meta name="description" content="your github contribution graph, as a lawn that gets mowed — and grows back. generate the workflow here." />
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #59636e;
+    --card: #f6f8fa;
+    --border: #d1d9e0;
+    --accent: #2f7d2f;
+    --code-bg: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --fg: #e6edf3;
+      --muted: #8b949e;
+      --card: #161b22;
+      --border: #30363d;
+      --accent: #39d353;
+      --code-bg: #161b22;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 40px 20px 80px; }
+  h1 { font-size: 2.2rem; margin: 0; }
+  h1 .mow { color: var(--accent); }
+  .tagline { color: var(--muted); margin: 4px 0 28px; }
+  .preview {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+  .preview svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .preview-note { color: var(--muted); font-size: 0.85rem; text-align: center; margin: 6px 0 0; }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    align-items: end;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 32px;
+  }
+  .controls label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+  .controls input[type="text"], .controls select {
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+  .controls input[type="range"] { width: 130px; accent-color: var(--accent); }
+  .controls input[type="color"] {
+    width: 44px;
+    height: 32px;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+  }
+  .controls .check { display: flex; align-items: center; gap: 6px; padding-bottom: 6px; }
+  .controls .check label { margin: 0; font-size: 0.9rem; color: var(--fg); }
+  h2 { font-size: 1.2rem; margin: 32px 0 8px; }
+  h2 small { font-weight: normal; color: var(--muted); font-size: 0.85rem; margin-left: 8px; }
+  .codebox { position: relative; }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    overflow-x: auto;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, "Cascadia Code", Consolas, monospace;
+    white-space: pre;
+  }
+  .copy {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font: 12px inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .copy:hover { border-color: var(--accent); }
+  footer { margin-top: 48px; color: var(--muted); font-size: 0.85rem; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1><span class="mow">mow</span>mow</h1>
+  <p class="tagline">touch grass. or at least mow it.</p>
+
+  <div class="preview" id="preview"></div>
+  <p class="preview-note">preview uses synthetic data seeded by the username — the real thing reads your actual contribution calendar.</p>
+
+  <div class="controls">
+    <div>
+      <label for="user">github username</label>
+      <input type="text" id="user" value="octocat" spellcheck="false" autocomplete="off" />
+    </div>
+    <div>
+      <label for="theme">theme</label>
+      <select id="theme">
+        <option value="light">light</option>
+        <option value="dark">dark</option>
+      </select>
+    </div>
+    <div>
+      <label for="mower">mower</label>
+      <select id="mower">
+        <option value="push">push mower</option>
+        <option value="riding">riding mower</option>
+        <option value="goat">goat</option>
+      </select>
+    </div>
+    <div>
+      <label for="mowerColor">mower color</label>
+      <input type="color" id="mowerColor" value="#d94f3d" />
+    </div>
+    <div>
+      <label for="cycle">cycle: <span id="cycleVal">30</span>s</label>
+      <input type="range" id="cycle" min="28" max="90" step="1" value="30" />
+    </div>
+    <div>
+      <label for="weeks">weeks: <span id="weeksVal">53</span></label>
+      <input type="range" id="weeks" min="10" max="53" step="1" value="53" />
+    </div>
+    <div class="check">
+      <input type="checkbox" id="stripes" checked />
+      <label for="stripes">stripes</label>
+    </div>
+  </div>
+
+  <h2>1 — add the workflow <small>.github/workflows/mow.yml in your profile repo</small></h2>
+  <div class="codebox">
+    <button class="copy" data-target="yaml">copy</button>
+    <pre id="yaml"></pre>
+  </div>
+
+  <h2>2 — put the lawn in your readme <small>above the fold, obviously</small></h2>
+  <div class="codebox">
+    <button class="copy" data-target="md">copy</button>
+    <pre id="md"></pre>
+  </div>
+
+  <h2>3 — run it once</h2>
+  <p>go to the repo's <strong>actions</strong> tab, pick <strong>mow</strong>, hit <strong>run workflow</strong>.
+     after that it re-mows itself every day.</p>
+
+  <footer>
+    mit licensed · <a href="https://github.com/sudongcu/mowmow">github.com/sudongcu/mowmow</a>
+  </footer>
+</main>
+
+<script type="module">
+import { renderLawn, PALETTES } from "./lib/render.js";
+import { demoLawn } from "./lib/demo.js";
+
+const $ = (id) => document.getElementById(id);
+const state = { user: "octocat", theme: "light", cycle: 30, weeks: 53, mower: "push", mowerColor: null, stripes: true };
+const defaultMowerColor = () => PALETTES[state.theme].mower;
+
+function workflowYaml() {
+  const withLines = [`          github_user_name: ${state.user || "your-username"}`];
+  if (state.cycle !== 30) withLines.push(`          cycle: "${state.cycle}"`);
+  if (state.mower !== "push") withLines.push(`          mower: ${state.mower}`);
+  if (state.mowerColor) withLines.push(`          mower_color: "${state.mowerColor}"`);
+  // leave the untouched options in as comments, so they're discoverable in place
+  if (state.cycle === 30) withLines.push(`          # cycle: "45"              # seconds per mow-and-regrow loop (min 28)`);
+  if (state.mower === "push") withLines.push(`          # mower: goat              # push | riding | goat`);
+  if (!state.mowerColor) withLines.push(`          # mower_color: "#ff69b4"   # hex color for the mower body / goat coat`);
+  const overrides = [];
+  if (state.weeks !== 53) overrides.push(`weeks=${state.weeks}`);
+  if (!state.stripes) overrides.push(`stripes=false`);
+  const q = overrides.length ? `?${overrides.join("&")}` : "";
+  if (q) {
+    withLines.push(`          outputs: |`);
+    withLines.push(`            lawn.svg${q}`);
+    withLines.push(`            lawn-dark.svg${q}&theme=dark`);
+  }
+  return [
+    `name: mow`,
+    `on:`,
+    `  schedule:`,
+    `    - cron: "0 3 * * *"`,
+    `  workflow_dispatch:`,
+    `permissions:`,
+    `  contents: write`,
+    `jobs:`,
+    `  mow:`,
+    `    runs-on: ubuntu-latest`,
+    `    steps:`,
+    `      - uses: sudongcu/mowmow@main`,
+    `        with:`,
+    ...withLines,
+  ].join("\n");
+}
+
+function markdownSnippet() {
+  const u = state.user || "your-username";
+  const base = `https://raw.githubusercontent.com/${u}/${u}/output`;
+  return [
+    `<picture>`,
+    `  <source media="(prefers-color-scheme: dark)" srcset="${base}/lawn-dark.svg" />`,
+    `  <img alt="my contribution lawn, freshly mowed" src="${base}/lawn.svg" />`,
+    `</picture>`,
+  ].join("\n");
+}
+
+function update() {
+  const lawn = demoLawn(state.user || "demo", 53);
+  $("preview").style.background = state.theme === "dark" ? "#0d1117" : "#ffffff";
+  $("preview").innerHTML = renderLawn(lawn, {
+    theme: state.theme,
+    cycle: state.cycle,
+    weeks: state.weeks,
+    mower: state.mower,
+    mowerColor: state.mowerColor || undefined,
+    stripes: state.stripes,
+  });
+  $("yaml").textContent = workflowYaml();
+  $("md").textContent = markdownSnippet();
+}
+
+let debounce;
+$("user").addEventListener("input", (e) => {
+  state.user = e.target.value.trim();
+  clearTimeout(debounce);
+  debounce = setTimeout(update, 300);
+});
+$("theme").addEventListener("change", (e) => {
+  state.theme = e.target.value;
+  if (!state.mowerColor) $("mowerColor").value = defaultMowerColor();
+  update();
+});
+$("mower").addEventListener("change", (e) => { state.mower = e.target.value; update(); });
+$("mowerColor").addEventListener("input", (e) => {
+  state.mowerColor = e.target.value === defaultMowerColor() ? null : e.target.value;
+  update();
+});
+$("cycle").addEventListener("input", (e) => {
+  state.cycle = Number(e.target.value);
+  $("cycleVal").textContent = state.cycle;
+  update();
+});
+$("weeks").addEventListener("input", (e) => {
+  state.weeks = Number(e.target.value);
+  $("weeksVal").textContent = state.weeks;
+  update();
+});
+$("stripes").addEventListener("change", (e) => { state.stripes = e.target.checked; update(); });
+
+document.querySelectorAll(".copy").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    await navigator.clipboard.writeText($(btn.dataset.target).textContent);
+    btn.textContent = "copied!";
+    setTimeout(() => (btn.textContent = "copy"), 1200);
+  });
+});
+
+update();
+</script>
+</body>
+</html>

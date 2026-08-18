@@ -1,0 +1,25 @@
+# self-demo: mowmow mowing its own author's lawn, daily.
+# the generated SVGs land on the orphan `output` branch as a single
+# force-pushed commit, so main's history never bloats.
+name: mow
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  mow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: mow the lawn
+        uses: ./
+        with:
+          github_user_name: sudongcu

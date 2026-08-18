@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "docs/lib",
+    "lib": ["ES2022", "DOM"],
+    "types": [],
+    "declaration": false,
+    "sourceMap": false,
+    "removeComments": true
+  },
+  "include": ["src/types.ts", "src/geometry.ts", "src/render.ts", "src/demo.ts"]
+}

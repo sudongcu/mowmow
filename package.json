@@ -1,0 +1,26 @@
+{
+  "name": "mowmow",
+  "version": "0.1.0",
+  "description": "your github contribution graph, as a lawn that gets mowed — and grows back",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": "Donggu Seo <sudongcu@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sudongcu/mowmow.git"
+  },
+  "scripts": {
+    "cli": "tsx src/cli.ts",
+    "demo": "tsx src/cli.ts demo --demo true",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "npm run build:action && npm run build:docs",
+    "build:action": "tsc -p tsconfig.action.json",
+    "build:docs": "tsc -p tsconfig.docs.json"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
