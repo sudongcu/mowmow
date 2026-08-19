@@ -1,6 +1,6 @@
 # action.yml lives at the repo root (not action/) so users can write
 # `uses: sudongcu/mowmow@v1` — github only resolves root-level actions that way.
-name: "mowmow"
+name: "mowmow lawn"
 description: "your github contribution graph, as a lawn that gets mowed — and grows back"
 author: "sudongcu"
 branding:
