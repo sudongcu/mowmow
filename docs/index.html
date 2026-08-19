@@ -187,7 +187,8 @@ import { demoLawn } from "./lib/demo.js";
 
 const $ = (id) => document.getElementById(id);
 const state = { user: "octocat", theme: "light", cycle: 30, weeks: 53, mower: "push", mowerColor: null, stripes: true };
-const defaultMowerColor = () => PALETTES[state.theme].mower;
+const defaultMowerColor = () =>
+  state.mower === "goat" ? PALETTES[state.theme].goatBody : PALETTES[state.theme].mower;
 // "octocat" is just the preview seed — never let it leak into the snippets,
 // or people paste it and mow the mascot's lawn instead of their own
 const realUser = () => (state.user && state.user !== "octocat" ? state.user : null);
@@ -269,7 +270,11 @@ $("theme").addEventListener("change", (e) => {
   if (!state.mowerColor) $("mowerColor").value = defaultMowerColor();
   update();
 });
-$("mower").addEventListener("change", (e) => { state.mower = e.target.value; update(); });
+$("mower").addEventListener("change", (e) => {
+  state.mower = e.target.value;
+  if (!state.mowerColor) $("mowerColor").value = defaultMowerColor();
+  update();
+});
 $("mowerColor").addEventListener("input", (e) => {
   state.mowerColor = e.target.value === defaultMowerColor() ? null : e.target.value;
   update();
