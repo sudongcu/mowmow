@@ -80,7 +80,7 @@ suspiciously bare, see [my lawn is mostly dirt?](#my-lawn-is-mostly-dirt).
 | `outputs` | light + dark pair | newline-separated files (relative to the branch root), each with optional `?theme=&cycle=&weeks=&mower=&mower_color=&stripes=` overrides |
 | `target_branch` | `output` | where the files get force-pushed, as a single orphan commit |
 | `push` | `true` | set `false` to only stage files in `mowmow/` and handle publishing yourself |
-| `github_token` | `github.token` | reads the calendar, pushes the branch — the auto-provided one is enough, unless your commits are mostly private ([see below](#my-lawn-is-mostly-dirt)) |
+| `github_token` | `github.token` | reads the calendar, pushes the branch — the auto-provided one is enough (mostly-private commits? [see below](#my-lawn-is-mostly-dirt)) |
 
 ## customize
 
@@ -130,19 +130,16 @@ the lawn shows your *public* calendar. if most of your commits live in
 private repos, the default token renders a 4,000-contribution year as a
 desert with three brave tufts.
 
-two fixes:
+the fix: on your profile's contribution graph, open **contribution
+settings → private contributions**. github folds private contributions
+into the public calendar (anonymized — just counts, no repo names) and
+the lawn picks them up.
 
-- **easiest:** on your profile's contribution graph, open **contribution
-  settings → private contributions**. github folds private contributions
-  into the public calendar (anonymized — just counts, no repo names) and
-  the lawn picks them up.
-- **keep your profile as-is:** create a
-  [classic PAT with the `repo` scope](https://github.com/settings/tokens/new?scopes=repo&description=mowmow),
-  add it to your profile repo as a secret, and pass it as
-  `github_token: ${{ secrets.YOUR_SECRET }}` — the action then reads your
-  own full calendar without changing what visitors see.
+(a PAT won't do it — the graphql calendar never includes private
+contributions, no matter what scopes the token has. the profile toggle
+is the only lever github gives anyone.)
 
-either way, re-run the workflow once (actions tab → `mow` → run workflow)
+then re-run the workflow once (actions tab → `mow` → run workflow)
 instead of waiting for tomorrow's mow. one honest warning: the svg and the
 readme image both sit behind github caches for ~5 minutes — if the lawn
 still looks bare right after the run, wait a bit and refresh before
