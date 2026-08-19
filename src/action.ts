@@ -123,8 +123,10 @@ async function run(): Promise<void> {
   // a fresh single-commit repo every run keeps `output` an orphan branch:
   // force-pushing it never grows anyone's history
   git("init", "-q", "-b", branch);
-  git("config", "user.name", "mowmow");
-  git("config", "user.email", "mowmow@users.noreply.github.com");
+  // the actions bot identity — an invented "mowmow" email would get
+  // attributed to the real github user of that name
+  git("config", "user.name", "github-actions[bot]");
+  git("config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com");
   git("add", ".");
   git("commit", "-q", "-m", "mow");
   git("push", "-q", "-f", remote, branch);

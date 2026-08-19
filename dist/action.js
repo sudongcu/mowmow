@@ -109,8 +109,8 @@ async function run() {
         execFileSync("git", args, { cwd: stageDir, stdio: ["ignore", "inherit", "inherit"] });
     };
     git("init", "-q", "-b", branch);
-    git("config", "user.name", "mowmow");
-    git("config", "user.email", "mowmow@users.noreply.github.com");
+    git("config", "user.name", "github-actions[bot]");
+    git("config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com");
     git("add", ".");
     git("commit", "-q", "-m", "mow");
     git("push", "-q", "-f", remote, branch);
