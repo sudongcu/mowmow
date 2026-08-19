@@ -235,18 +235,23 @@ function ridingSprite(p: Palette): string {
 
 function goatSprite(p: Palette): string {
   return (
-    `<polygon points="-7.4,-11.6 -10.4,-14 -6.6,-10" fill="${p.goatDetail}"/>` +
-    `<rect x="-6.4" y="-5.6" width="1.7" height="5.6" rx="0.8" fill="${p.goatDetail}"/>` +
-    `<rect x="-3.2" y="-5.6" width="1.7" height="5.6" rx="0.8" fill="${p.goatDetail}"/>` +
-    `<rect x="2" y="-5.6" width="1.7" height="5.6" rx="0.8" fill="${p.goatDetail}"/>` +
-    `<rect x="4.9" y="-5.6" width="1.7" height="5.6" rx="0.8" fill="${p.goatDetail}"/>` +
-    `<ellipse cx="0" cy="-9.5" rx="7.6" ry="4.8" fill="${p.goatBody}"/>` +
-    // grazing pose: head down in the grass, horns swept back
-    `<path d="M 7.6 -8.8 C 6.6 -12 8.2 -13.4 9.8 -12.6" stroke="${p.goatDetail}" stroke-width="1.3" stroke-linecap="round" fill="none"/>` +
-    `<ellipse cx="9" cy="-6.4" rx="3" ry="2.6" fill="${p.goatBody}"/>` +
-    `<ellipse cx="6.9" cy="-8.2" rx="1.6" ry="0.9" fill="${p.goatDetail}"/>` +
-    `<circle cx="9.9" cy="-7.1" r="0.55" fill="#222222"/>` +
-    `<polygon points="10.6,-4.6 11.3,-1.8 9.5,-4.2" fill="${p.goatDetail}"/>`
+    // head-up munching pose: horns and beard carry the silhouette,
+    // the fresh-torn tuft in its mouth carries the job description
+    `<polygon points="-7.4,-13 -10,-16.2 -6.2,-14.4" fill="${p.goatDetail}"/>` +
+    `<rect x="-6.8" y="-8" width="1.7" height="8" rx="0.8" fill="${p.goatDetail}"/>` +
+    `<rect x="-4" y="-8" width="1.7" height="8" rx="0.8" fill="${p.goatDetail}"/>` +
+    `<rect x="1" y="-8" width="1.7" height="8" rx="0.8" fill="${p.goatDetail}"/>` +
+    `<rect x="3.6" y="-8" width="1.7" height="8" rx="0.8" fill="${p.goatDetail}"/>` +
+    `<rect x="-8.2" y="-13.8" width="12.6" height="7" rx="3.2" fill="${p.goatBody}"/>` +
+    `<polygon points="1.4,-13.8 6.6,-17.4 8.4,-14.6 3.2,-9.6" fill="${p.goatBody}"/>` +
+    `<path d="M 6.2 -18 C 6.8 -21.6 4.6 -23.2 2.4 -22.4 C 4.4 -22 5 -20 4.2 -18.2 Z" fill="${p.goatDetail}" opacity="0.55" transform="translate(-1.2 0.5)"/>` +
+    `<path d="M 6.2 -18 C 6.8 -21.6 4.6 -23.2 2.4 -22.4 C 4.4 -22 5 -20 4.2 -18.2 Z" fill="${p.goatDetail}"/>` +
+    `<ellipse cx="5.2" cy="-16" rx="1.7" ry="0.9" fill="${p.goatDetail}" transform="rotate(35 5.2 -16)"/>` +
+    `<ellipse cx="8" cy="-16.8" rx="3.2" ry="2" fill="${p.goatBody}" transform="rotate(15 8 -16.8)"/>` +
+    `<ellipse cx="10.3" cy="-15.9" rx="1.3" ry="1" fill="${p.goatDetail}" opacity="0.75" transform="rotate(15 10.3 -15.9)"/>` +
+    `<polygon points="8.9,-15.1 9.8,-12.2 10.7,-14.8" fill="${p.goatDetail}"/>` +
+    `<path d="M 11.2 -15.4 L 12.6 -14 M 11.2 -15.4 L 11.6 -13.2" stroke="${p.grass[2]}" stroke-width="0.9" stroke-linecap="round" fill="none"/>` +
+    `<circle cx="8.6" cy="-17.3" r="0.6" fill="#222222"/>`
   );
 }
 
