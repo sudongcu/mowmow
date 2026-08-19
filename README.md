@@ -122,29 +122,27 @@ to regrow, so the renderer will clamp it and grumble.)
 
 ## my lawn is mostly dirt?
 
-the lawn shows what the api hands a stranger: your *public* contributions.
-if most of your commits live in private repos, the default token renders a
-4,000-contribution year as a desert with three brave tufts.
+the lawn shows your *public* calendar. if most of your commits live in
+private repos, the default token renders a 4,000-contribution year as a
+desert with three brave tufts.
 
-the profile toggle (**contribution settings → private contributions**)
-won't fix it — that only changes the graph on github.com. the api keeps
-private contributions hidden from everyone but you, so the action has to
-read the calendar *as you*:
+two fixes:
 
-1. create a [classic PAT with the `repo` scope](https://github.com/settings/tokens/new?scopes=repo&description=mowmow)
-2. add it to your profile repo as a secret named `MOWMOW_TOKEN`
-   (repo **settings → secrets and variables → actions → new repository secret**)
-3. hand it to the action:
+- **easiest:** on your profile's contribution graph, open **contribution
+  settings → private contributions**. github folds private contributions
+  into the public calendar (anonymized — just counts, no repo names) and
+  the lawn picks them up.
+- **keep your profile as-is:** create a
+  [classic PAT with the `repo` scope](https://github.com/settings/tokens/new?scopes=repo&description=mowmow),
+  add it to your profile repo as a secret, and pass it as
+  `github_token: ${{ secrets.YOUR_SECRET }}` — the action then reads your
+  own full calendar without changing what visitors see.
 
-```yaml
-with:
-  github_user_name: <you>
-  github_token: ${{ secrets.MOWMOW_TOKEN }}
-```
-
-then re-run the workflow once (actions tab → `mow` → run workflow) instead
-of waiting for tomorrow's mow. if the readme still shows the old lawn
-after that, it's github's image cache — give it five minutes and refresh.
+either way, re-run the workflow once (actions tab → `mow` → run workflow)
+instead of waiting for tomorrow's mow. one honest warning: the svg and the
+readme image both sit behind github caches for ~5 minutes — if the lawn
+still looks bare right after the run, wait a bit and refresh before
+concluding it didn't work.
 
 ## cli
 

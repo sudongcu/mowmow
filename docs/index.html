@@ -170,8 +170,10 @@
   <p>go to the repo's <strong>actions</strong> tab, pick <strong>mow</strong>, hit <strong>run workflow</strong>.
      after that it re-mows itself every day.</p>
   <p>lawn came out mostly dirt? the lawn shows your <em>public</em> contributions —
-     if most of your commits are in private repos, pass a PAT with the
-     <code>repo</code> scope as <code>github_token:</code> and run the workflow again.
+     if most of your commits are in private repos, turn on
+     <strong>contribution settings → private contributions</strong> on your profile
+     graph (or pass a <code>repo</code>-scoped PAT as <code>github_token:</code>),
+     run the workflow again, and give the image cache five minutes.
      <a href="https://github.com/sudongcu/mowmow#my-lawn-is-mostly-dirt">details</a>.</p>
 
   <footer>
@@ -186,9 +188,16 @@ import { demoLawn } from "./lib/demo.js";
 const $ = (id) => document.getElementById(id);
 const state = { user: "octocat", theme: "light", cycle: 30, weeks: 53, mower: "push", mowerColor: null, stripes: true };
 const defaultMowerColor = () => PALETTES[state.theme].mower;
+// "octocat" is just the preview seed — never let it leak into the snippets,
+// or people paste it and mow the mascot's lawn instead of their own
+const realUser = () => (state.user && state.user !== "octocat" ? state.user : null);
 
 function workflowYaml() {
-  const withLines = [`          github_user_name: ${state.user || "your-username"}`];
+  const withLines = [
+    realUser()
+      ? `          github_user_name: ${realUser()}`
+      : `          github_user_name: <your-username>   # ← your github login`,
+  ];
   if (state.cycle !== 30) withLines.push(`          cycle: "${state.cycle}"`);
   if (state.mower !== "push") withLines.push(`          mower: ${state.mower}`);
   if (state.mowerColor) withLines.push(`          mower_color: "${state.mowerColor}"`);
@@ -224,7 +233,7 @@ function workflowYaml() {
 }
 
 function markdownSnippet() {
-  const u = state.user || "your-username";
+  const u = realUser() || "<you>";
   const base = `https://raw.githubusercontent.com/${u}/${u}/output`;
   return [
     `<picture>`,
