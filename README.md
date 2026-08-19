@@ -39,7 +39,7 @@ jobs:
   mow:
     runs-on: ubuntu-latest
     steps:
-      - uses: sudongcu/mowmow@main
+      - uses: sudongcu/mowmow@v1
         with:
           github_user_name: <your-username>
           # cycle: "45"              # seconds per mow-and-regrow loop (min 28)
