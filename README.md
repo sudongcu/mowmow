@@ -172,6 +172,10 @@ cutting; the rest is regrow tail, so the lawn is whole again before the loop
 restarts. a full year of lawn is ~150 KB of SVG that gzips to ~9 KB, and
 github's image proxy serves it gzipped.
 
+---
+
+if the goat made you smile, a ⭐ helps other lawns find their mower.
+
 ## license
 
 [mit](LICENSE). fork it, self-host it. the goat is already on it — `mower: goat`.
