@@ -2,6 +2,10 @@
 
 > touch grass. or at least mow it.
 
+[![marketplace](https://img.shields.io/badge/marketplace-mowmow%20lawn-2ea44f?style=flat-square&logo=github)](https://github.com/marketplace/actions/mowmow-lawn)
+[![release](https://img.shields.io/github/v/release/sudongcu/mowmow?style=flat-square&color=2ea44f&label=release)](https://github.com/sudongcu/mowmow/releases)
+[![license](https://img.shields.io/github/license/sudongcu/mowmow?style=flat-square&color=2ea44f)](LICENSE)
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sudongcu/mowmow/output/lawn-dark.svg" />
   <img alt="sudongcu's contribution lawn, freshly mowed" src="https://raw.githubusercontent.com/sudongcu/mowmow/output/lawn.svg" />
