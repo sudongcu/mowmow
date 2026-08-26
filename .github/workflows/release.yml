@@ -1,0 +1,46 @@
+# push a vX.Y.Z tag: this runs ci, moves the floating vX tag (what
+# `uses: sudongcu/mowmow@v1` resolves to) onto it, and creates the release.
+#
+#   git tag v1.0.3            # lightweight → release notes auto-generated
+#   git tag -a v1.0.3 -m "…"  # annotated  → the tag message is the notes
+#   git push origin v1.0.3
+name: release
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: move the floating major tag
+        run: |
+          major="${GITHUB_REF_NAME%%.*}"   # v1.0.3 → v1
+          git tag -f "$major" "$GITHUB_SHA"
+          git push -f origin "$major"
+          echo "$major → $GITHUB_REF_NAME ($GITHUB_SHA)"
+
+      - name: github release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # already made by hand in the ui? leave it alone
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "release $GITHUB_REF_NAME already exists, not touching it"
+            exit 0
+          fi
+          if [ "$(git cat-file -t "$GITHUB_REF_NAME")" = "tag" ]; then
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-from-tag
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          fi

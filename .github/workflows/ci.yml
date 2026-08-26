@@ -1,0 +1,49 @@
+# release.yml reuses this (workflow_call), so a commit that fails here never gets the v1 tag.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: build
+        run: npm run build
+
+      # dist/ and docs/lib/ are committed on purpose (the action runs dist/action.js
+      # straight from the checkout) — stale output would ship silently, so make it an error
+      - name: committed build output matches src
+        run: |
+          if [ -n "$(git status --porcelain -- dist docs/lib)" ]; then
+            echo "::error::dist/ or docs/lib/ is out of date — run 'npm run build' and commit the result"
+            git status --short -- dist docs/lib
+            git --no-pager diff --stat -- dist docs/lib
+            exit 1
+          fi
+
+      # end-to-end on the node the action actually runs on
+      - name: render a demo lawn
+        run: |
+          npx tsx src/cli.ts ci --demo true --out "$RUNNER_TEMP/lawn.svg"
+          npx tsx src/cli.ts ci --demo true --theme dark --mower goat --cycle 90 --out "$RUNNER_TEMP/lawn-dark.svg"
+          grep -q "<svg " "$RUNNER_TEMP/lawn.svg"
+          grep -q "<svg " "$RUNNER_TEMP/lawn-dark.svg"
