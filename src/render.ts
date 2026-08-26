@@ -1,7 +1,6 @@
 import type { Cell, Lawn, Level, MowerStyle, Palette, RenderOptions, Theme } from "./types.js";
 import {
   DAYS,
-  MOW_FRACTION,
   REGROW_DURATION,
   canvasHeight,
   canvasWidth,
@@ -47,10 +46,25 @@ const REGROW_DELAY: Record<Exclude<Level, 0>, number> = { 1: 5.2, 2: 4.0, 3: 2.8
 /** seconds the cut itself takes — near-instant snap under the blade */
 const CUT_SNAP = 0.06;
 
-/** shortest cycle whose last-row regrow still fits inside the loop */
-export function minCycle(): number {
-  const tail = CUT_SNAP + REGROW_DELAY[1] + REGROW_DURATION;
-  return Math.ceil(tail / (1 - MOW_FRACTION));
+/** seconds from a level-1 cut until it's whole again — the slowest regrow on the lawn */
+const SLOWEST_REGROW = CUT_SNAP + REGROW_DELAY[1] + REGROW_DURATION;
+/** a beat of finished lawn before the mower re-enters */
+const REGROW_BEAT = 0.5;
+/**
+ * Seconds the mower parks off-screen after its last pass. Fixed, whatever the
+ * cycle: a longer cycle means a slower mower, not a longer wait for it.
+ */
+export const REGROW_TAIL = SLOWEST_REGROW + REGROW_BEAT;
+/**
+ * Shortest cycle that fits the full tail. Below it the mower keeps this
+ * cycle's pace ratio instead of sprinting, so the tail gets squeezed —
+ * timeline() clamps the late regrows and renderLawn warns.
+ */
+export const MIN_CYCLE = 28;
+
+/** seconds of the cycle the mower spends cutting */
+function mowSeconds(cycle: number): number {
+  return cycle >= MIN_CYCLE ? cycle - REGROW_TAIL : cycle * (1 - REGROW_TAIL / MIN_CYCLE);
 }
 
 const nf = (v: number, p = 2): string => {
@@ -120,13 +134,20 @@ function escapeXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function tuftSvg(cell: Cell, weeks: number, palette: Palette, cycle: number, clampedRef: { count: number }): string {
+function tuftSvg(
+  cell: Cell,
+  weeks: number,
+  palette: Palette,
+  cycle: number,
+  mow: number,
+  clampedRef: { count: number },
+): string {
   const level = cell.level as Exclude<Level, 0>;
   const h = BLADE_HEIGHT[level];
   const color = palette.grass[level - 1];
   const cx = cellCenterX(cell.week);
   const y = rowBaselineY(cell.day);
-  const cutT = cutFraction(cell.week, cell.day, weeks) * cycle;
+  const cutT = cutFraction(cell.week, cell.day, weeks) * mow;
   const cutScale = Math.min(0.3, Math.max(0.1, 2.8 / h));
   const regrowStart = cutT + REGROW_DELAY[level];
   const tl = timeline(
@@ -153,10 +174,10 @@ function tuftSvg(cell: Cell, weeks: number, palette: Palette, cycle: number, cla
   );
 }
 
-function dirtSvg(cell: Cell, weeks: number, palette: Palette, cycle: number): string {
+function dirtSvg(cell: Cell, weeks: number, palette: Palette, cycle: number, mow: number): string {
   const cx = cellCenterX(cell.week);
   const y = rowBaselineY(cell.day);
-  const cutT = cutFraction(cell.week, cell.day, weeks) * cycle;
+  const cutT = cutFraction(cell.week, cell.day, weeks) * mow;
   const fade = timeline(
     [
       { t: 0, v: "0" },
@@ -261,14 +282,16 @@ const SPRITES: Record<MowerStyle, (p: Palette) => string> = {
   goat: goatSprite,
 };
 
-function mowerSvg(weeks: number, palette: Palette, cycle: number, style: MowerStyle): string {
+function mowerSvg(weeks: number, palette: Palette, cycle: number, mow: number, style: MowerStyle): string {
   const sprite = SPRITES[style](palette);
+  // cycle fraction at which the mower finishes its last pass and parks
+  const mowEnd = mow / cycle;
   const flips = flipFractions(weeks);
   const flipValues = ["1 1"];
   const flipTimes = ["0"];
   flips.forEach((f, i) => {
     flipValues.push(i % 2 === 0 ? "-1 1" : "1 1");
-    flipTimes.push(nf(f, 5));
+    flipTimes.push(nf(f * mowEnd, 5));
   });
   return (
     `<g><g>` +
@@ -277,7 +300,7 @@ function mowerSvg(weeks: number, palette: Palette, cycle: number, style: MowerSt
     `repeatCount="indefinite" values="${flipValues.join(";")}" keyTimes="${flipTimes.join(";")}"/>` +
     `</g>` +
     `<animateMotion dur="${nf(cycle)}s" repeatCount="indefinite" rotate="0" calcMode="linear" ` +
-    `keyPoints="0;1;1" keyTimes="0;${nf(MOW_FRACTION, 5)};1" path="${mowerPath(weeks)}"/>` +
+    `keyPoints="0;1;1" keyTimes="0;${nf(mowEnd, 5)};1" path="${mowerPath(weeks)}"/>` +
     `</g>`
   );
 }
@@ -300,20 +323,21 @@ export function renderLawn(lawn: Lawn, options: RenderOptions = {}): string {
   }
   const width = canvasWidth(weeks);
   const height = canvasHeight();
+  const mow = mowSeconds(cycle);
   const clampedRef = { count: 0 };
 
   const cells = [...trimmed.cells].sort((a, b) => a.day - b.day || a.week - b.week);
   const dirt: string[] = [];
   const tufts: string[] = [];
   for (const cell of cells) {
-    if (cell.level === 0) dirt.push(dirtSvg(cell, weeks, palette, cycle));
-    else tufts.push(tuftSvg(cell, weeks, palette, cycle, clampedRef));
+    if (cell.level === 0) dirt.push(dirtSvg(cell, weeks, palette, cycle, mow));
+    else tufts.push(tuftSvg(cell, weeks, palette, cycle, mow, clampedRef));
   }
 
   if (clampedRef.count > 0) {
     warn(
       `cycle=${cycle}s is too short for the regrow tail — ${clampedRef.count} tuft timeline(s) got squeezed. ` +
-        `use --cycle ${minCycle()} or longer.`,
+        `use --cycle ${MIN_CYCLE} or longer.`,
     );
   }
 
@@ -326,7 +350,7 @@ export function renderLawn(lawn: Lawn, options: RenderOptions = {}): string {
     dirt.join("") +
     tufts.join("") +
     (stripes ? stripesSvg(weeks, palette) : "") +
-    mowerSvg(weeks, palette, cycle, mower) +
+    mowerSvg(weeks, palette, cycle, mow, mower) +
     `</svg>`
   );
 }

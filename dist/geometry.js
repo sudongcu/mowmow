@@ -4,7 +4,6 @@ export const MARGIN_X = 14;
 export const MARGIN_TOP = 18;
 export const MARGIN_BOTTOM = 16;
 export const DAYS = 7;
-export const MOW_FRACTION = 0.78;
 export const REGROW_DURATION = 0.9;
 export const OVERHANG = 28;
 export function canvasWidth(weeks) {
@@ -42,7 +41,7 @@ export function cutFraction(week, day, weeks) {
     const cx = cellCenterX(week);
     const within = day % 2 === 0 ? cx - xStart : xEnd - cx;
     const dist = day * (run + ROW) + within;
-    return (dist / totalPathLength(weeks)) * MOW_FRACTION;
+    return dist / totalPathLength(weeks);
 }
 export function flipFractions(weeks) {
     const { xStart, xEnd } = pathEndpoints(weeks);
@@ -50,7 +49,7 @@ export function flipFractions(weeks) {
     const total = totalPathLength(weeks);
     const out = [];
     for (let k = 1; k < DAYS; k++) {
-        out.push(((k * (run + ROW) - ROW / 2) / total) * MOW_FRACTION);
+        out.push((k * (run + ROW) - ROW / 2) / total);
     }
     return out;
 }

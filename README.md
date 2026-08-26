@@ -73,7 +73,7 @@ suspiciously bare, see [my lawn is mostly dirt?](#my-lawn-is-mostly-dirt).
 | input | default | what it does |
 |---|---|---|
 | `github_user_name` | — | whose lawn (required) |
-| `cycle` | `30` | seconds per mow-and-regrow loop. 28 is the floor — shorter and the last row can't regrow in time, so timings get clamped (with a warning). no hard ceiling; 30–90 looks right |
+| `cycle` | `30` | seconds per mow-and-regrow loop. 28 is the floor — shorter and the last row can't regrow in time, so timings get clamped (with a warning). no hard ceiling: longer just means a slower mower, the pause before the next lap stays the same. 30–90 looks right |
 | `theme` | `light` | `light` or `dark` |
 | `mower` | `push` | `push`, `riding`, or `goat` — the goat doesn't cut your lawn, it eats it. same thing |
 | `mower_color` | theme default | any hex color for the mower body (or the goat's coat), e.g. `#ff8800` |
@@ -168,10 +168,12 @@ GITHUB_TOKEN=... npx tsx src/cli.ts <login>     # the real thing
 `animateMotion` distributes a path over its duration by arc length, so the
 mower moves at constant speed — a tuft's cut time is just its distance along
 the mower's boustrophedon path divided by the total length. the blades line up
-with the grass exactly, no per-cell tuning. the mower spends 78% of the loop
-cutting; the rest is regrow tail, so the lawn is whole again before the loop
-restarts. a full year of lawn is ~150 KB of SVG that gzips to ~9 KB, and
-github's image proxy serves it gzipped.
+with the grass exactly, no per-cell tuning. after its last pass the mower
+parks off-screen for a fixed ~6.7 seconds — long enough for the slowest tuft
+to stand back up, so the lawn is whole again before the loop restarts. a
+longer `cycle` slows the mower down rather than stretching that pause. a full
+year of lawn is ~150 KB of SVG that gzips to ~9 KB, and github's image proxy
+serves it gzipped.
 
 ---
 

@@ -6,8 +6,6 @@ export const MARGIN_X = 14;
 export const MARGIN_TOP = 18;
 export const MARGIN_BOTTOM = 16;
 export const DAYS = 7;
-/** fraction of the loop the mower spends cutting; the rest is regrow tail */
-export const MOW_FRACTION = 0.78;
 /** seconds a tuft takes to spring back once its regrow delay has passed */
 export const REGROW_DURATION = 0.9;
 /**
@@ -58,9 +56,9 @@ export function totalPathLength(weeks: number): number {
 }
 
 /**
- * Fraction of the animation cycle at which the mower crosses a cell.
- * animateMotion distributes the path by arc length, so this is just the
- * cell's distance along the path over the total, scaled by MOW_FRACTION.
+ * How far along the mower's path a cell sits, as a fraction of the whole path.
+ * animateMotion distributes the path by arc length, so a tuft's cut time is
+ * just this times the seconds the mower spends cutting.
  */
 export function cutFraction(week: number, day: number, weeks: number): number {
   const { xStart, xEnd } = pathEndpoints(weeks);
@@ -68,17 +66,17 @@ export function cutFraction(week: number, day: number, weeks: number): number {
   const cx = cellCenterX(week);
   const within = day % 2 === 0 ? cx - xStart : xEnd - cx;
   const dist = day * (run + ROW) + within;
-  return (dist / totalPathLength(weeks)) * MOW_FRACTION;
+  return dist / totalPathLength(weeks);
 }
 
-/** cycle fractions at which the mower turns around (midpoint of each off-canvas hop) */
+/** path fractions at which the mower turns around (midpoint of each off-canvas hop) */
 export function flipFractions(weeks: number): number[] {
   const { xStart, xEnd } = pathEndpoints(weeks);
   const run = xEnd - xStart;
   const total = totalPathLength(weeks);
   const out: number[] = [];
   for (let k = 1; k < DAYS; k++) {
-    out.push(((k * (run + ROW) - ROW / 2) / total) * MOW_FRACTION);
+    out.push((k * (run + ROW) - ROW / 2) / total);
   }
   return out;
 }

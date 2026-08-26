@@ -1,4 +1,4 @@
-import { DAYS, MOW_FRACTION, REGROW_DURATION, canvasHeight, canvasWidth, cellCenterX, cutFraction, flipFractions, mowerPath, rowBaselineY, COL, MARGIN_X, ROW, } from "./geometry.js";
+import { DAYS, REGROW_DURATION, canvasHeight, canvasWidth, cellCenterX, cutFraction, flipFractions, mowerPath, rowBaselineY, COL, MARGIN_X, ROW, } from "./geometry.js";
 export const PALETTES = {
     light: {
         dirt: "#8a6b45",
@@ -28,9 +28,12 @@ export const PALETTES = {
 const BLADE_HEIGHT = { 1: 10, 2: 15, 3: 20, 4: 24 };
 const REGROW_DELAY = { 1: 5.2, 2: 4.0, 3: 2.8, 4: 1.6 };
 const CUT_SNAP = 0.06;
-export function minCycle() {
-    const tail = CUT_SNAP + REGROW_DELAY[1] + REGROW_DURATION;
-    return Math.ceil(tail / (1 - MOW_FRACTION));
+const SLOWEST_REGROW = CUT_SNAP + REGROW_DELAY[1] + REGROW_DURATION;
+const REGROW_BEAT = 0.5;
+export const REGROW_TAIL = SLOWEST_REGROW + REGROW_BEAT;
+export const MIN_CYCLE = 28;
+function mowSeconds(cycle) {
+    return cycle >= MIN_CYCLE ? cycle - REGROW_TAIL : cycle * (1 - REGROW_TAIL / MIN_CYCLE);
 }
 const nf = (v, p = 2) => {
     let s = v.toFixed(p);
@@ -84,13 +87,13 @@ export function normalizeHexColor(c) {
 function escapeXml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
-function tuftSvg(cell, weeks, palette, cycle, clampedRef) {
+function tuftSvg(cell, weeks, palette, cycle, mow, clampedRef) {
     const level = cell.level;
     const h = BLADE_HEIGHT[level];
     const color = palette.grass[level - 1];
     const cx = cellCenterX(cell.week);
     const y = rowBaselineY(cell.day);
-    const cutT = cutFraction(cell.week, cell.day, weeks) * cycle;
+    const cutT = cutFraction(cell.week, cell.day, weeks) * mow;
     const cutScale = Math.min(0.3, Math.max(0.1, 2.8 / h));
     const regrowStart = cutT + REGROW_DELAY[level];
     const tl = timeline([
@@ -112,10 +115,10 @@ function tuftSvg(cell, weeks, palette, cycle, clampedRef) {
         `dur="${nf(cycle)}s" repeatCount="indefinite" values="${tl.values}" keyTimes="${tl.keyTimes}"/>` +
         `</g></g>`);
 }
-function dirtSvg(cell, weeks, palette, cycle) {
+function dirtSvg(cell, weeks, palette, cycle, mow) {
     const cx = cellCenterX(cell.week);
     const y = rowBaselineY(cell.day);
-    const cutT = cutFraction(cell.week, cell.day, weeks) * cycle;
+    const cutT = cutFraction(cell.week, cell.day, weeks) * mow;
     const fade = timeline([
         { t: 0, v: "0" },
         { t: cutT, v: "0" },
@@ -195,14 +198,15 @@ const SPRITES = {
     riding: ridingSprite,
     goat: goatSprite,
 };
-function mowerSvg(weeks, palette, cycle, style) {
+function mowerSvg(weeks, palette, cycle, mow, style) {
     const sprite = SPRITES[style](palette);
+    const mowEnd = mow / cycle;
     const flips = flipFractions(weeks);
     const flipValues = ["1 1"];
     const flipTimes = ["0"];
     flips.forEach((f, i) => {
         flipValues.push(i % 2 === 0 ? "-1 1" : "1 1");
-        flipTimes.push(nf(f, 5));
+        flipTimes.push(nf(f * mowEnd, 5));
     });
     return (`<g><g>` +
         sprite +
@@ -210,7 +214,7 @@ function mowerSvg(weeks, palette, cycle, style) {
         `repeatCount="indefinite" values="${flipValues.join(";")}" keyTimes="${flipTimes.join(";")}"/>` +
         `</g>` +
         `<animateMotion dur="${nf(cycle)}s" repeatCount="indefinite" rotate="0" calcMode="linear" ` +
-        `keyPoints="0;1;1" keyTimes="0;${nf(MOW_FRACTION, 5)};1" path="${mowerPath(weeks)}"/>` +
+        `keyPoints="0;1;1" keyTimes="0;${nf(mowEnd, 5)};1" path="${mowerPath(weeks)}"/>` +
         `</g>`);
 }
 export function renderLawn(lawn, options = {}) {
@@ -232,19 +236,20 @@ export function renderLawn(lawn, options = {}) {
     }
     const width = canvasWidth(weeks);
     const height = canvasHeight();
+    const mow = mowSeconds(cycle);
     const clampedRef = { count: 0 };
     const cells = [...trimmed.cells].sort((a, b) => a.day - b.day || a.week - b.week);
     const dirt = [];
     const tufts = [];
     for (const cell of cells) {
         if (cell.level === 0)
-            dirt.push(dirtSvg(cell, weeks, palette, cycle));
+            dirt.push(dirtSvg(cell, weeks, palette, cycle, mow));
         else
-            tufts.push(tuftSvg(cell, weeks, palette, cycle, clampedRef));
+            tufts.push(tuftSvg(cell, weeks, palette, cycle, mow, clampedRef));
     }
     if (clampedRef.count > 0) {
         warn(`cycle=${cycle}s is too short for the regrow tail — ${clampedRef.count} tuft timeline(s) got squeezed. ` +
-            `use --cycle ${minCycle()} or longer.`);
+            `use --cycle ${MIN_CYCLE} or longer.`);
     }
     const login = escapeXml(trimmed.login);
     return (`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" ` +
@@ -254,6 +259,6 @@ export function renderLawn(lawn, options = {}) {
         dirt.join("") +
         tufts.join("") +
         (stripes ? stripesSvg(weeks, palette) : "") +
-        mowerSvg(weeks, palette, cycle, mower) +
+        mowerSvg(weeks, palette, cycle, mow, mower) +
         `</svg>`);
 }
