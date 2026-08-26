@@ -31,7 +31,7 @@ const CUT_SNAP = 0.06;
 const SLOWEST_REGROW = CUT_SNAP + REGROW_DELAY[1] + REGROW_DURATION;
 const REGROW_BEAT = 0.5;
 export const REGROW_TAIL = SLOWEST_REGROW + REGROW_BEAT;
-export const MIN_CYCLE = 28;
+export const MIN_CYCLE = 15;
 function mowSeconds(cycle) {
     return cycle >= MIN_CYCLE ? cycle - REGROW_TAIL : cycle * (1 - REGROW_TAIL / MIN_CYCLE);
 }

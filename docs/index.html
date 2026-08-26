@@ -142,7 +142,7 @@
     </div>
     <div>
       <label for="cycle">cycle: <span id="cycleVal">30</span>s</label>
-      <input type="range" id="cycle" min="28" max="90" step="1" value="30" />
+      <input type="range" id="cycle" min="15" max="90" step="1" value="30" />
     </div>
     <div>
       <label for="weeks">weeks: <span id="weeksVal">53</span></label>
@@ -203,7 +203,7 @@ function workflowYaml() {
   if (state.mower !== "push") withLines.push(`          mower: ${state.mower}`);
   if (state.mowerColor) withLines.push(`          mower_color: "${state.mowerColor}"`);
   // leave the untouched options in as comments, so they're discoverable in place
-  if (state.cycle === 30) withLines.push(`          # cycle: "45"              # seconds per mow-and-regrow loop (min 28)`);
+  if (state.cycle === 30) withLines.push(`          # cycle: "45"              # seconds per mow-and-regrow loop (min 15)`);
   if (state.mower === "push") withLines.push(`          # mower: goat              # push | riding | goat`);
   if (!state.mowerColor) withLines.push(`          # mower_color: "#ff69b4"   # hex color for the mower body / goat coat`);
   const overrides = [];

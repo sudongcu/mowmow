@@ -46,7 +46,7 @@ jobs:
       - uses: sudongcu/mowmow@v1
         with:
           github_user_name: <your-username>
-          # cycle: "45"              # seconds per mow-and-regrow loop (min 28)
+          # cycle: "45"              # seconds per mow-and-regrow loop (min 15)
           # mower: goat              # push | riding | goat
           # mower_color: "#ff69b4"   # hex color for the mower body / goat coat
 ```
@@ -73,7 +73,7 @@ suspiciously bare, see [my lawn is mostly dirt?](#my-lawn-is-mostly-dirt).
 | input | default | what it does |
 |---|---|---|
 | `github_user_name` | — | whose lawn (required) |
-| `cycle` | `30` | seconds per mow-and-regrow loop. 28 is the floor — shorter and the last row can't regrow in time, so timings get clamped (with a warning). no hard ceiling: longer just means a slower mower, the pause before the next lap stays the same. 30–90 looks right |
+| `cycle` | `30` | seconds per mow-and-regrow loop. 15 is the floor — shorter and the last row can't regrow in time, so timings get clamped (with a warning). no hard ceiling: longer just means a slower mower, the pause before the next lap stays the same. 30–90 looks right |
 | `theme` | `light` | `light` or `dark` |
 | `mower` | `push` | `push`, `riding`, or `goat` — the goat doesn't cut your lawn, it eats it. same thing |
 | `mower_color` | theme default | any hex color for the mower body (or the goat's coat), e.g. `#ff8800` |
@@ -121,7 +121,7 @@ with:
 
 every `outputs` line is its own lawn — anything from the options table works
 as a `?key=value` override, so one run can mow as many variants as you want.
-(one thing to know: `cycle` under 28s doesn't leave the last row enough time
+(one thing to know: `cycle` under 15s doesn't leave the last row enough time
 to regrow, so the renderer will clamp it and grumble.)
 
 ## my lawn is mostly dirt?
@@ -156,7 +156,7 @@ GITHUB_TOKEN=... npx tsx src/cli.ts <login>     # the real thing
 
   --out <path>       output file (default <login>-lawn.svg)
   --theme <t>        light | dark (default light)
-  --cycle <sec>      seconds per loop (default 30, don't go under 28)
+  --cycle <sec>      seconds per loop (default 30, don't go under 15)
   --weeks <n>        only the most recent n weeks
   --mower <m>        push | riding | goat (default push)
   --mower-color <c>  hex color for the mower body / goat coat

@@ -10,7 +10,7 @@ const USAGE = `usage: npx tsx src/cli.ts <login> [options]
 
   --out <path>       output file (default <login>-lawn.svg)
   --theme <t>        light | dark (default light)
-  --cycle <sec>      seconds per mow-and-regrow loop (default 30, min 28 —
+  --cycle <sec>      seconds per mow-and-regrow loop (default 30, min 15 —
                      shorter gets clamped with a warning)
   --weeks <n>        only the most recent n weeks (1-53)
   --mower <m>        push | riding | goat (default push)

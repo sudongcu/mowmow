@@ -60,7 +60,7 @@ export const REGROW_TAIL = SLOWEST_REGROW + REGROW_BEAT;
  * cycle's pace ratio instead of sprinting, so the tail gets squeezed —
  * timeline() clamps the late regrows and renderLawn warns.
  */
-export const MIN_CYCLE = 28;
+export const MIN_CYCLE = 15;
 
 /** seconds of the cycle the mower spends cutting */
 function mowSeconds(cycle: number): number {

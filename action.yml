@@ -15,7 +15,7 @@ inputs:
     description: >-
       newline-separated list of files to generate, relative to the root of the
       target branch. each line may carry overrides as a query string:
-      theme=light|dark, cycle=<seconds, 28+>, weeks=<1-53>,
+      theme=light|dark, cycle=<seconds, 15+>, weeks=<1-53>,
       mower=push|riding|goat, mower_color=<hex>, stripes=false.
       e.g. `lawn.svg?theme=dark&mower=goat`
     required: false
@@ -23,7 +23,7 @@ inputs:
       lawn.svg
       lawn-dark.svg?theme=dark
   cycle:
-    description: "seconds per mow-and-regrow loop. 28 or more — shorter and the last row can't regrow in time, so timings get clamped with a warning. no hard ceiling"
+    description: "seconds per mow-and-regrow loop. 15 or more — shorter and the last row can't regrow in time, so timings get clamped with a warning. no hard ceiling"
     required: false
     default: "30"
   theme:
