@@ -9,5 +9,5 @@
     "sourceMap": false,
     "removeComments": true
   },
-  "include": ["src/types.ts", "src/geometry.ts", "src/render.ts", "src/demo.ts"]
+  "include": ["src/types.ts", "src/geometry.ts", "src/render.ts", "src/demo.ts", "src/publicLawn.ts"]
 }

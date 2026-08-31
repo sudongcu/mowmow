@@ -114,7 +114,7 @@
   <p class="tagline">touch grass. or at least mow it.</p>
 
   <div class="preview" id="preview"></div>
-  <p class="preview-note">preview uses synthetic data seeded by the username — the real thing reads your actual contribution calendar.</p>
+  <p class="preview-note" id="previewNote" aria-live="polite"></p>
 
   <div class="controls">
     <div>
@@ -184,6 +184,7 @@
 <script type="module">
 import { renderLawn, PALETTES } from "./lib/render.js";
 import { demoLawn } from "./lib/demo.js";
+import { fetchPublicLawn } from "./lib/publicLawn.js";
 
 const $ = (id) => document.getElementById(id);
 const state = { user: "octocat", theme: "light", cycle: 30, weeks: 53, mower: "push", mowerColor: null, stripes: true };
@@ -192,6 +193,54 @@ const defaultMowerColor = () =>
 // "octocat" is just the preview seed — never let it leak into the snippets,
 // or people paste it and mow the mascot's lawn instead of their own
 const realUser = () => (state.user && state.user !== "octocat" ? state.user : null);
+
+// real graphs by login, from a public mirror of the profile page (no token needed).
+// a string entry means there is no lawn to fetch for that name, so don't ask again
+const lawns = new Map();
+let inflight = null;
+let mirrorDown = false;
+const LOGIN = /^[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){0,38}$/i;
+
+async function loadLawn(login) {
+  if (lawns.has(login)) return;
+  if (!LOGIN.test(login)) {
+    lawns.set(login, `"${login}" isn't a github username`);
+    return;
+  }
+  inflight?.abort();
+  const ctrl = (inflight = new AbortController());
+  mirrorDown = false;
+  try {
+    lawns.set(login, await fetchPublicLawn(login, ctrl.signal));
+  } catch (err) {
+    if (ctrl.signal.aborted) return;
+    if (/not found/.test(err.message)) lawns.set(login, `no github user called ${login}`);
+    else mirrorDown = true; // transient — not cached, so retyping the name retries
+  }
+  if (realUser() === login) update();
+}
+
+function currentLawn() {
+  const real = lawns.get(realUser());
+  return real && typeof real !== "string" ? real : demoLawn(state.user || "demo", 53);
+}
+
+function previewNote() {
+  const u = realUser();
+  if (!u) return "preview uses synthetic data seeded by the username — type yours to see your actual lawn.";
+  const real = lawns.get(u);
+  if (real === undefined) {
+    return mirrorDown
+      ? "couldn't reach the contribution graph — showing synthetic data seeded by the username instead."
+      : `fetching ${u}'s contribution graph…`;
+  }
+  if (typeof real === "string") return `${real} — showing synthetic data seeded by the name instead.`;
+  const grass = real.cells.filter((c) => c.level > 0).length / real.cells.length;
+  return (
+    `${u}'s actual public contribution graph — the action reads the same calendar.` +
+    (grass < 0.15 ? " mostly dirt? see step 3." : "")
+  );
+}
 
 function workflowYaml() {
   const withLines = [
@@ -245,7 +294,7 @@ function markdownSnippet() {
 }
 
 function update() {
-  const lawn = demoLawn(state.user || "demo", 53);
+  const lawn = currentLawn();
   $("preview").style.background = state.theme === "dark" ? "#0d1117" : "#ffffff";
   $("preview").innerHTML = renderLawn(lawn, {
     theme: state.theme,
@@ -255,6 +304,7 @@ function update() {
     mowerColor: state.mowerColor || undefined,
     stripes: state.stripes,
   });
+  $("previewNote").textContent = previewNote();
   $("yaml").textContent = workflowYaml();
   $("md").textContent = markdownSnippet();
 }
@@ -263,7 +313,11 @@ let debounce;
 $("user").addEventListener("input", (e) => {
   state.user = e.target.value.trim();
   clearTimeout(debounce);
-  debounce = setTimeout(update, 300);
+  debounce = setTimeout(() => {
+    const u = realUser();
+    if (u) loadLawn(u);
+    update();
+  }, 300);
 });
 $("theme").addEventListener("change", (e) => {
   state.theme = e.target.value;
